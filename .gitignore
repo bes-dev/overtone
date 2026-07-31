@@ -1,0 +1,9 @@
+.build/
+.DS_Store
+*.xcodeproj
+*.xcworkspace
+
+# Model weights and the compiled speech server: 400 MB, and a single file over
+# GitHub's 100 MB limit. They ship in the release DMG instead — see the README.
+Runtime/
+dist/

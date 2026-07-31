@@ -1,0 +1,62 @@
+name: Overtone
+options:
+  bundleIdPrefix: ai.overtone
+  deploymentTarget:
+    macOS: "14.0"
+settings:
+  base:
+    SWIFT_VERSION: "5.0"
+    MARKETING_VERSION: "1.0.0"
+    CURRENT_PROJECT_VERSION: "1"
+    CODE_SIGN_STYLE: Automatic
+schemes:
+  Overtone:
+    build:
+      targets:
+        # Keeping the app out of the test action means `xcodebuild test` never leaves a
+        # second .app around for Launch Services to route overtone:// URLs into.
+        Overtone: [run, archive, profile, analyze]
+        OvertoneTests: [test]
+    test:
+      targets:
+        - OvertoneTests
+targets:
+  Overtone:
+    type: application
+    platform: macOS
+    sources:
+      - Sources
+      - path: skills/overtone-voice/SKILL.md
+        buildPhase: resources
+      - path: Runtime
+        type: folder
+        buildPhase: resources
+    info:
+      path: Info.plist
+      properties:
+        CFBundleDisplayName: Overtone
+        CFBundleShortVersionString: $(MARKETING_VERSION)
+        LSUIElement: true
+        NSHighResolutionCapable: true
+        CFBundleURLTypes:
+          - CFBundleURLName: ai.overtone.speak
+            CFBundleURLSchemes:
+              - overtone
+              - supertonic
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: ai.overtone.app
+        PRODUCT_NAME: Overtone
+        GENERATE_INFOPLIST_FILE: false
+  OvertoneTests:
+    type: bundle.unit-test
+    platform: macOS
+    sources:
+      - Tests
+      - Sources/SpeechText.swift
+      - Sources/SilenceTrim.swift
+      - Sources/ControlServer.swift
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: ai.overtone.app.tests
+        GENERATE_INFOPLIST_FILE: true
