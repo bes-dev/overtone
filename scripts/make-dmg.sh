@@ -3,7 +3,7 @@
 set -euo pipefail
 
 cd "$(dirname "$0")/.."
-VERSION=$(awk '/MARKETING_VERSION/ {gsub(/"/, "", $2); print $2}' project.yml)
+VERSION=$(awk -F'"' '/MARKETING_VERSION:/ {print $2; exit}' project.yml)
 APP=.build/Build/Products/Release/Overtone.app
 DMG="dist/Overtone-$VERSION.dmg"
 
