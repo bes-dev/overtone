@@ -71,6 +71,11 @@ done
   update. Put the detail in your text answer instead.
 - Do not read out an entire diff or log. Summarize, then offer the details in text.
 
+## The user's own shortcuts
+
+`⌥⌘P` speaks the selected text anywhere on the Mac, `⌥⌘.` stops. Worth mentioning if
+someone asks how to hear a piece of text without going through you.
+
 ## When to use it
 
 Speak when the user asked to hear something, or when they asked to be notified by

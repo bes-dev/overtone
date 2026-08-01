@@ -38,7 +38,7 @@ API; `esc` returns.
 
 | Shortcut | Where | Action |
 | --- | --- | --- |
-| `⌥⌘S` | anywhere | speak whatever is on the clipboard |
+| `⌥⌘P` | anywhere | speak the selected text, or the clipboard if nothing is selected |
 | `⌥⌘.` | anywhere | stop |
 | `⌘↩` | in the panel | speak the text |
 | `⌘.` | in the panel | stop |
@@ -47,9 +47,13 @@ Voice, language, quality, speed and volume are saved as you change them. Only
 **Static MLProgram** restarts the speech server; everything else applies to the next
 utterance.
 
-Shortcuts.app exposes *Speak with Overtone*, *Speak clipboard with Overtone* and
-*Stop Overtone*. The `overtone://` URL scheme takes `text`, and optionally `voice`
-and `language`:
+Reading the selection copies it first, which macOS only allows an app to do by
+driving the keyboard — so `⌥⌘P` asks for Accessibility the first time. Decline it and
+the shortcut still works, just from the clipboard.
+
+Shortcuts.app exposes *Speak with Overtone*, *Speak selection with Overtone*, *Speak
+clipboard with Overtone* and *Stop Overtone*. The `overtone://` URL scheme takes
+`text`, and optionally `voice` and `language`:
 
 ```bash
 open "overtone://speak?text=Привет&voice=F2&language=ru"
@@ -173,7 +177,7 @@ Without that, wrapped text inherits the same chopped-up prosody as over-small ch
 | `PCMStreamPlayer` | playback, lead-silence trimming, pause, device-change recovery |
 | `SilenceTrim` / `SpeechText` | pure logic, unit tested |
 | `ControlServer` / `ControlAPI` | loopback HTTP framing / routing onto the app |
-| `GlobalHotKeys` | Carbon hotkey registration |
+| `GlobalHotKeys` / `Selection` | Carbon hotkey registration / copying the selection |
 | `HelpView` / `AgentSkill` | the in-panel help page / the bundled SKILL.md |
 
 If the app is force-killed, its speech server keeps the port; the next launch adopts

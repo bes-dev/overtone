@@ -10,7 +10,7 @@ struct HelpView: View {
     let controlPort: UInt16
 
     private var globalShortcuts: [(String, String)] {
-        [(speakHotKey, "Speak the clipboard"), (stopHotKey, "Stop")]
+        [(speakHotKey, "Speak the selected text, or the clipboard"), (stopHotKey, "Stop")]
     }
 
     private let windowShortcuts = [

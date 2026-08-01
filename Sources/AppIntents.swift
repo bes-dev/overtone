@@ -44,3 +44,14 @@ struct SpeakClipboardIntent: AppIntent {
         return .result()
     }
 }
+
+struct SpeakSelectionIntent: AppIntent {
+    static let title: LocalizedStringResource = "Speak selection with Overtone"
+    static let description = IntentDescription("Copy the selected text and read it aloud.")
+    static let openAppWhenRun = false
+
+    func perform() async throws -> some IntentResult {
+        await MainActor.run { AppBridge.shared.state?.speakSelection() }
+        return .result()
+    }
+}

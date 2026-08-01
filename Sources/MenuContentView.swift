@@ -149,11 +149,11 @@ struct MenuContentView: View {
                 Spacer()
 
                 Button {
-                    state.readClipboard()
+                    state.speakSelection()
                 } label: {
-                    Label("Clipboard", systemImage: "doc.on.clipboard")
+                    Label("Selection", systemImage: "text.viewfinder")
                 }
-                .help("Read the clipboard aloud  ·  \(state.speakHotKeyLabel)")
+                .help("Read the selected text, or the clipboard  ·  \(state.speakHotKeyLabel)")
             }
 
             if state.isSpeaking {
@@ -238,6 +238,16 @@ struct MenuContentView: View {
                 ))
                 Toggle("Global shortcuts  ·  \(state.speakHotKeyLabel) speak, \(state.stopHotKeyLabel) stop",
                        isOn: $state.hotKeysEnabled)
+                if state.needsAccessibility {
+                    HStack(spacing: 6) {
+                        Text("Reading the selection needs Accessibility")
+                            .font(.caption)
+                            .foregroundStyle(.secondary)
+                        Button("Grant…", action: state.grantAccessibility)
+                            .buttonStyle(.link)
+                            .font(.caption)
+                    }
+                }
                 Toggle("Static MLProgram (may compile new shapes)", isOn: $state.useStaticCoreML)
                 Stepper("Chunk limit: " + String(state.maxChunkLength) + " chars",
                         value: $state.maxChunkLength, in: 80...600, step: 20)

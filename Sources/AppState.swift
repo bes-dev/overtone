@@ -42,6 +42,7 @@ final class AppState: ObservableObject {
     @Published private(set) var serverStatus: ServerStatus = .stopped
     @Published private(set) var isSpeaking = false
     @Published private(set) var isPaused = false
+    @Published private(set) var needsAccessibility = false
     @Published private(set) var elapsed: TimeInterval = 0
     @Published private(set) var buffered: TimeInterval = 0
     @Published var lastError: String?
@@ -49,7 +50,7 @@ final class AppState: ObservableObject {
     let voices = (1...5).map { "M\($0)" } + (1...5).map { "F\($0)" }
     let languages = ["ru", "en", "uk", "de", "fr", "es", "it", "pt", "pl", "ja", "ko", "na"]
     let controlPort: UInt16 = 7789
-    let speakHotKeyLabel = "⌥⌘S"
+    let speakHotKeyLabel = "⌥⌘P"
     let stopHotKeyLabel = "⌥⌘."
 
     var statusJSON: String {
@@ -59,6 +60,7 @@ final class AppState: ObservableObject {
             "elapsed": NSDecimalNumber(string: String(format: "%.2f", elapsed)),
             "buffered": NSDecimalNumber(string: String(format: "%.2f", buffered)),
             "error": lastError ?? NSNull(),
+            "accessibility": Selection.isTrusted,
         ]
         guard let data = try? JSONSerialization.data(withJSONObject: payload, options: [.sortedKeys]),
               let json = String(data: data, encoding: .utf8) else { return #"{"status":"unknown"}"# }
@@ -73,6 +75,7 @@ final class AppState: ObservableObject {
     private var currentRequestID = UUID()
     private var controlServer: ControlServer?
     private var progressTimer: Timer?
+    private var accessibilityAsked = false
     private let defaults = UserDefaults.standard
 
     private var runtimeDirectory: URL {
@@ -187,6 +190,34 @@ final class AppState: ObservableObject {
         player.setPaused(isPaused)
     }
 
+    /// One keystroke for "read this": the selection if there is one, the clipboard otherwise.
+    func speakSelection() {
+        Task {
+            guard Selection.isTrusted else {
+                needsAccessibility = true
+                if !accessibilityAsked {
+                    accessibilityAsked = true
+                    Selection.requestTrust()
+                }
+                readClipboard()
+                return
+            }
+            needsAccessibility = false
+            guard let selected = await Selection.copy(),
+                  !selected.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty else {
+                readClipboard()
+                return
+            }
+            text = selected
+            speak()
+        }
+    }
+
+    func grantAccessibility() {
+        Selection.requestTrust()
+        Selection.openAccessibilitySettings()
+    }
+
     func readClipboard() {
         guard let value = NSPasteboard.general.string(forType: .string),
               !value.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty else {
@@ -285,8 +316,8 @@ final class AppState: ObservableObject {
         hotKeys.unregisterAll()
         guard hotKeysEnabled else { return }
         let modifiers = optionKey | cmdKey
-        let registered = hotKeys.register(keyCode: kVK_ANSI_S, modifiers: modifiers) { [weak self] in
-            Task { @MainActor in self?.readClipboard() }
+        let registered = hotKeys.register(keyCode: kVK_ANSI_P, modifiers: modifiers) { [weak self] in
+            Task { @MainActor in self?.speakSelection() }
         } && hotKeys.register(keyCode: kVK_ANSI_Period, modifiers: modifiers) { [weak self] in
             Task { @MainActor in self?.stop() }
         }
